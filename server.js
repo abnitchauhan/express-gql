@@ -1,31 +1,24 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cors = require('cors'); 
-const port = process.env.PORT||5000
-const app = express()
+var express = require('express');
+var {graphqlHTTP} = require('express-graphql');
+var {buildSchema} = require('graphql');
 
-// Register Middleware
-app.use(bodyParser.json(), cors()) 
+var port = process.env.PORT||3000;
 
-// Adding the Type Definition.
-const typeDefinition = `
-type Query  {
-   greeting: String
-}`
-const  resolverObject = {
-   Query : {
-      greeting: () => 'Hello GraphQL  From TutorialsPoint !!'
+var schema = buildSchema(`
+   type Query {
+      hello: String
+      hi : String
    }
-}
+`);
 
-const {makeExecutableSchema} = require('graphql-tools');
+var root = { hello : () => 'Hello World !', hi : () => 'Abnit Chauhan'};
 
-const schema = makeExecutableSchema({typeDefs: typeDefinition, resolvers: resolverObject})
+var app = express();
 
-const {graphqlExpress, graphiqlExpress} = require('apollo-server-express');
+app.use('/graphql', graphqlHTTP({
+   schema: schema,
+   rootValue: root,
+   graphiql: true,
+}))
 
-// Create routes for graphQL and graphiQL
-app.use('/graphql', graphqlExpress({schema}))
-app.use('/graphiql', graphiqlExpress({endpointURL: '/graphql'}))
-  
-app.listen(port, () => console.log(`Server running at PORT: ${port}`))
+app.listen(3000, () => console.log(`Server Running at http://localhost:${port}`))
